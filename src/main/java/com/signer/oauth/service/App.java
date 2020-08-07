@@ -3,12 +3,54 @@
  */
 package com.signer.oauth.service;
 
-public class App {
-    public String getGreeting() {
-        return "Hello world.";
-    }
+import com.signer.oauth.service.impl.JsonConfiguration;
 
-    public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServer;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.BodyHandler;
+
+public class App {
+	private static final String AS_APP_PATH = "authserver";
+	private static final String AS_VERSION_PATH = "v1";
+	private static final String AS_TOKEN_PATH = "oauth/token";
+	
+	private ClientCredentialsGrantHandler ccgHandler;
+	private Configuration config;
+	
+    public static void main(String[] args) throws Exception {
+    	App app = new App();
+    	app.executeApp();
+    }
+    
+    public App() throws Exception {
+    	config = new JsonConfiguration();
+    	ccgHandler = new ClientCredentialsGrantHandler(config);
+    }
+    
+    public void executeApp() throws Exception {
+    	Vertx vertx = Vertx.vertx();
+		HttpServer server = vertx.createHttpServer();
+
+		Router mainRouter = Router.router(vertx);
+
+		Router oauthRouter = Router.router(vertx);
+		oauthRouter.route().handler(BodyHandler.create());
+		
+		mainRouter.mountSubRouter("/" + AS_APP_PATH + "/" + AS_VERSION_PATH, oauthRouter);
+			oauthRouter.route(HttpMethod.POST, "/" + AS_TOKEN_PATH).handler(routingContext -> {
+			
+			if(!ccgHandler.applies(routingContext.getBodyAsString())) {
+				routingContext.response().setStatusCode(400).end();
+				return;
+			}
+			ccgHandler.authorize(routingContext.request(), routingContext.response());
+		});
+
+		server.requestHandler(mainRouter);
+
+		server.listen(config.getPort());
+		System.out.println("Authorization Server listening on port " + config.getPort());
     }
 }
