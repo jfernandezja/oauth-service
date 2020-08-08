@@ -18,7 +18,6 @@ public class App {
 	
 	private ClientCredentialsGrantHandler ccgHandler;
 	private Configuration config;
-	private String a;
 	
     public static void main(String[] args) throws Exception {
     	App app = new App();
