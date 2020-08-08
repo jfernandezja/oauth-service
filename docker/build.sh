@@ -1,4 +1,4 @@
 #!bin/bash
 
-cp $WORKSPACE/build/distributions/oauth-service.tar $WORKSPACE/docker
-docker build -t oauth-service docker/Dockerfile
+cp build/distributions/oauth-service.tar docker
+docker build -t oauth-service docker
