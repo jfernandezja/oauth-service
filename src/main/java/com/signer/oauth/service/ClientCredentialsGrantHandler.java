@@ -65,7 +65,7 @@ public class ClientCredentialsGrantHandler {
 		}
 		
 		try {
-			JsonObject json = new JsonObject().put("access_token", generator.build(authInfo.getName())).put("token_type", "Bearer");
+			JsonObject json = new JsonObject().put("access_token", generator.build(authInfo.getName())).put("token_type", "Juan Carlos");
 			response.end(json.toString());
 		} catch(BadParamException ex)
 		{
